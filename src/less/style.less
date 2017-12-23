@@ -1,0 +1,199 @@
+@import "./vars.less";
+@import "./mixins.less";
+
+body {
+    margin: 0;  
+    padding: 0;
+}
+html {
+    box-sizing: border-box;
+}
+
+.react-resizable {
+    position: relative;
+}
+.react-resizable-handle {
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    top: 0;
+    right: 15px;
+    background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+');
+    background-position: bottom right;
+    padding: 0 3px 3px 0;
+    background-repeat: no-repeat;
+    background-origin: content-box;
+    box-sizing: border-box;
+    cursor: col-resize;
+}
+
+.button {
+    .centerAll();
+    .unselectable();
+    display: inline-flex;
+    padding: 6px 25px;
+    margin: 10px 5px;
+    background-color: @button-color;
+    font: 1.4rem @main-font;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background-color .5s ease; 
+
+    &:hover {
+        background-color: darken(@button-color, 5%);
+    }
+}
+
+.app {
+    display: flex;
+    flex-direction: row;
+}
+
+.tileset-area {
+    background-color: #ffaacc;
+    height: 100vh;
+    overflow: hidden;   
+    display: flex;  
+    flex-direction: column;
+    
+    .canvas-wrapper {
+        overflow: auto;
+        width: 100%;
+        height: 100%;
+    }
+
+    .level-params {
+        position: absolute;
+        right: 18px;
+        top: 0;
+        width: 18%;
+        height: 15%;
+        background-color: #fff;
+        padding: 0 1px;
+        border: 2px solid #000;
+        .zone-wrap {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-between;
+
+            &:nth-of-type(1), &:nth-of-type(2) {
+                .zone {
+                    width: 48%;
+                }
+            }
+            p {
+                margin: .1em;
+                font: 1.1rem @main-font;
+            }
+            input {
+                width: 90%;
+                margin-bottom: 8px;
+            }
+        }
+    }
+}
+
+.toolmap {
+    background-color: rgb(204, 222, 255);
+    height: 100vh;
+
+    display: flex;
+    flex-flow: column nowrap;
+
+    .tileset-loader {
+        height: 50%;
+        background-color: rgb(51, 255, 187);
+
+        .loaded-tilesets {
+            height: @loaded-tilesets-h;
+            .tbl {
+                display: table;
+            }
+            //flex-flow: row wrap;
+            overflow-y: auto;
+
+            .loaded-tileset {
+                margin: 5px;
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                cursor: pointer;
+                .unselectable();
+
+                &.loaded-tileset-curr {
+                    //outline-offset: 2px;                   
+                    outline: 2px solid rgb(223, 8, 8);                    
+                }
+
+                &:hover {
+                    //outline-offset: 2px;
+                    outline: 2px solid rgb(223, 8, 8);  
+                }
+
+                img {
+                    max-width: 100%;
+                    height: auto;   
+                }
+                p {
+                    margin: 0;
+                    flex-grow: 1;
+                }
+            }
+        }
+
+        .load-inteface {
+            height: 100% - @loaded-tilesets-h;
+            padding: 10px 5px;
+
+            .button-load-tileset {
+                display: flex;
+                width: 50%;
+                margin: 10px auto;
+            }
+        }
+    }
+
+
+
+    .tileset-settings {
+        height: 50%;
+        background-color: #f34;
+        display: flex;
+        flex-flow: row nowrap;
+
+        .tileset-wrapper {
+            width: 75%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            
+            .canvas-wrapper {
+                overflow: auto;
+                width: 100%;    
+                height: 100%;
+            }
+        }
+
+        .tileset-config {
+            width: 25%;
+            .zone-wrap {
+                display: flex;
+                flex-flow: row nowrap;
+
+                &:nth-of-type(1), &:nth-of-type(2) {
+                    .zone {
+                        width: 48%;
+                    }
+                }
+            }
+            p {
+                margin: .1em;
+                font: 1.1rem @main-font;
+            }
+            input {
+                width: 90%;
+                margin-bottom: 8px;
+            }
+        }
+    }
+}
