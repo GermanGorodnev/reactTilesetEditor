@@ -51,21 +51,21 @@ export default class TilesetSettings extends React.Component {
     onCanvasMouseDown(event) {
         // image won't change during the move, write it in state
         const {tilesets, currentTileset} = this.props;
-        const image = tilesets[currentTileset] ? tilesets[currentTileset] : undefined;
-        if (image === undefined)
+        const tileset = tilesets[currentTileset] ? tilesets[currentTileset] : undefined;
+        if (tileset === undefined)
             return;
         // resets
 
         const stage = this.stageNode.getStage();
         const mousePos = stage.getPointerPosition();
 
-        const xs = image.tileOffsetX + mousePos.x;
-        const ys = image.tileOffsetY + mousePos.y;
+        const xs = tileset.tileOffsetX + mousePos.x;
+        const ys = tileset.tileOffsetY + mousePos.y;
 
-        const tilex = Math.floor(xs / image.tileW);
-        const tiley = Math.floor(ys / image.tileH);
+        const tilex = Math.floor(xs / tileset.tileW);
+        const tiley = Math.floor(ys / tileset.tileH);
         this.setState({
-            image,
+            image: tileset,
             pickingTile: true,
             tileSelectArea: {
                 ...this.state.tileSelectArea,
@@ -133,7 +133,14 @@ export default class TilesetSettings extends React.Component {
             return;
         }
         const {tileSelectArea} = this.state;
-        if (tileSelectArea.x == tileSelectArea.currX && tileSelectArea.y == tileSelectArea.currY) {
+        let newPenArea = {
+            tileX: Math.min(tileSelectArea.tileX, tileSelectArea.currTileX),
+            tileY: Math.min(tileSelectArea.tileY, tileSelectArea.currTileY),
+            tileWidth: tileSelectArea.w,
+            tileHeight: tileSelectArea.h
+        }
+        if (tileSelectArea.x === tileSelectArea.currX 
+            && tileSelectArea.y === tileSelectArea.currY) {
             this.setState({
                 pickingTile: false,
                 tileSelectArea: {
@@ -143,7 +150,14 @@ export default class TilesetSettings extends React.Component {
                     w: 1,
                     h: 1
                 }
-            });            
+            });   
+
+            newPenArea = {
+                tileX: tileSelectArea.tileX,
+                tileY: tileSelectArea.tileY,
+                tileWidth: 1,
+                tileHeight: 1
+            }         
         }
         else {
             this.setState({
@@ -151,7 +165,7 @@ export default class TilesetSettings extends React.Component {
             });   
         }
         // update global selected part
-        this.props.dispatch(setPenArea(this.state.tileSelectArea));
+        this.props.dispatch(setPenArea(newPenArea));
     }
 
     renderArea() {

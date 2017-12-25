@@ -1,3 +1,3 @@
 ## React Tileset Editor
-Small online React + Redux based tileset editor.
-Online version: [Soon]()
+Small online React + Redux based tileset editor.  
+Online version: Soon

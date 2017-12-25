@@ -1,14 +1,11 @@
 import { TILESET_LOADER } from "constants.js"
 import { TILESET_AREA } from "../constants";
 
-export function loadTileset(name, image, width, height) {
+export function loadTileset(params) {
     return {
         type: TILESET_LOADER.LOAD_TILESET,
         payload: {
-            name, 
-            image,
-            width,
-            height
+            params
         }
     }
 }

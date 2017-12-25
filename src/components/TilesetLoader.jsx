@@ -27,27 +27,60 @@ export default class TilesetLoader extends React.Component {
     }
 
     loadTileset() {
-        const files = this.fileInput.files;
+        const {files} = this.fileInput;
+        const {tilesets} = this.props; 
+        let LASTGID = 1;
         for (let f of files) {
             if (!f.type.match("image.*")) {
                 // TODO: disptach type error
                 console.log("wrong extension");
             }
+            let firstGridId = 0;
+            if (tilesets.length === 0) {
+                // 1st one
+                firstGridId = LASTGID;
+            } else {
+                const lasttileset = tilesets[tilesets.length - 1];
+                firstGridId = lasttileset.firstgridid +
+                    (Math.floor(lasttileset.width / lasttileset.tileW) * 
+                    Math.floor(lasttileset.height / lasttileset.tileH));
+            }
 
             var reader = new FileReader();
 
             reader.onload = (event) => {
+                console.log(firstGridId);
                 let image = new Image();
-                var w; 
-                var h;
                 image.src = event.target.result;  
                 const that = this;              
                 image.onload = function() {
-                    w = this.naturalWidth;
-                    h = this.naturalHeight;
-                    that.props.dispatch(loadTileset(f.name, this, w, h));                
-                }
+                    that.props.dispatch(loadTileset(
+                        {
+                            name: f.name, 
+                            image: this, 
+                            width: this.naturalWidth, 
+                            height: this.naturalHeight,
 
+                            tileWidth: Math.floor(this.naturalWidth / 64),
+                            tileHeight: Math.floor(this.naturalHeight / 64),
+
+                            tileW: 64,
+                            tileH: 64,
+
+                            tileOffsetX: 0,
+                            tileOffsetY: 0,
+
+                            tileSepX: 0,
+                            tileSepY: 0,
+
+                            firstgridid: LASTGID
+                        }
+                    ));
+                    LASTGID += (Math.floor(this.naturalWidth / 64) * 
+                        Math.floor(this.naturalHeight / 64));   
+                        console.log("NEW ", LASTGID)             
+                }
+                
             }
 
             reader.readAsDataURL(f);

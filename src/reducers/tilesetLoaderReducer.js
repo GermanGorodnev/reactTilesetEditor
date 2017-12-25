@@ -7,22 +7,31 @@ const initialState = {
 export default function reducer(state = initialState, action) {
     switch (action.type) {
         case TILESET_LOADER.LOAD_TILESET: {
+            const {params} = action.payload;
             return {
                 ...state,
                 tilesets: [
                     ...state.tilesets,
                     {
-                        name: action.payload.name,
-                        imageObject: action.payload.image,
-                        image: action.payload.image.src,
-                        width: action.payload.width,
-                        height: action.payload.height,
-                        tileW: 64,
-                        tileH: 64,
-                        tileOffsetX: 0,
-                        tileOffsetY: 0,
-                        tileSepX: 0,
-                        tileSepY: 0
+                        name: params.name,
+                        imageObject: params.image,
+                        image: params.image.src,
+                        width: params.width,
+                        height: params.height,
+
+                        tileWidth: params.tileWidth,
+                        tileHeight: params.tileHeight,
+
+                        tileW: params.tileW,
+                        tileH: params.tileH,
+
+                        tileOffsetX: params.tileOffsetX,
+                        tileOffsetY: params.tileOffsetY,
+
+                        tileSepX: params.tileSepX,
+                        tileSepY: params.tileSepY,
+
+                        firstgridid: params.firstgridid
                     }
                 ]
             }
@@ -33,6 +42,9 @@ export default function reducer(state = initialState, action) {
                 currentTileset: action.payload.index
             }
         }
+
+
+
         
         case TILESET_LOADER.TILESET_SET_WIDTH: {
             return {
@@ -41,7 +53,8 @@ export default function reducer(state = initialState, action) {
                     if (ind === state.currentTileset) {
                         return {
                             ...tileset,
-                            tileW: action.payload.newWidth
+                            tileW: action.payload.newWidth,
+                            tileWidth: Math.floor(tileset.width / action.payload.newWidth)
                         }
                     }
                     else {
@@ -60,7 +73,8 @@ export default function reducer(state = initialState, action) {
                     if (ind === state.currentTileset) {
                         return {
                             ...tileset,
-                            tileH: action.payload.newHeight
+                            tileH: action.payload.newHeight,
+                            tileHeight: Math.floor(tileset.height / action.payload.newHeight)
                         }
                     }
                     else {

@@ -23,3 +23,14 @@ export function renderGrid(canvasW, canvasH, tileW, tileH, offsetX = 0, offsetY 
     }
     return grid;
 }
+
+export function make2DArray(rows, cols, defaultValue = 0) {
+    var arr = new Array(rows);
+    for (let i = 0; i < arr.length; ++i) {
+        arr[i] = new Array(cols);
+        for (let j = 0; j < arr[i].length; ++j) {
+            arr[i][j] = defaultValue;
+        }
+    }
+    return arr;
+}
