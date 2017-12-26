@@ -15,7 +15,7 @@ import TilesetItem from "components/TilesetItem"
 })
 export default class TilesetLoader extends React.Component {
     renderLoadedTilesets() {
-        const {tilesets, currentTileset} = this.props; 
+        const {tilesets} = this.props; 
 
         let rendered = [];
         tilesets.forEach((tileset, i) => {
@@ -29,27 +29,26 @@ export default class TilesetLoader extends React.Component {
     loadTileset() {
         const {files} = this.fileInput;
         const {tilesets} = this.props; 
-        let LASTGID = 1;
-        for (let f of files) {
-            if (!f.type.match("image.*")) {
-                // TODO: disptach type error
-                console.log("wrong extension");
-            }
-            let firstGridId = 0;
+
+        let firstGridId = 0;
             if (tilesets.length === 0) {
                 // 1st one
-                firstGridId = LASTGID;
+                firstGridId = 1;
             } else {
                 const lasttileset = tilesets[tilesets.length - 1];
                 firstGridId = lasttileset.firstgridid +
                     (Math.floor(lasttileset.width / lasttileset.tileW) * 
                     Math.floor(lasttileset.height / lasttileset.tileH));
             }
+        for (let f of files) {
+            if (!f.type.match("image.*")) {
+                // TODO: disptach type error
+                console.log("wrong extension");
+            }
 
             var reader = new FileReader();
 
             reader.onload = (event) => {
-                console.log(firstGridId);
                 let image = new Image();
                 image.src = event.target.result;  
                 const that = this;              
@@ -73,12 +72,11 @@ export default class TilesetLoader extends React.Component {
                             tileSepX: 0,
                             tileSepY: 0,
 
-                            firstgridid: LASTGID
+                            firstgridid: firstGridId
                         }
                     ));
-                    LASTGID += (Math.floor(this.naturalWidth / 64) * 
-                        Math.floor(this.naturalHeight / 64));   
-                        console.log("NEW ", LASTGID)             
+                    firstGridId += (Math.floor(this.naturalWidth / 64) * 
+                        Math.floor(this.naturalHeight / 64));             
                 }
                 
             }

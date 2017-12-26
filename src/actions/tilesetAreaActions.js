@@ -1,5 +1,6 @@
 import { TILESET_AREA } from "constants.js"
 import thunk from "redux-thunk"
+import { exec } from "child_process";
 export function setAreaSize(newWidth, newHeight) {
     return {
         type: TILESET_AREA.SET_SIZE,
@@ -41,10 +42,11 @@ export function setPenArea(newArea) {
 
 
 
-export function levelLayerAdd(width, height) {
+export function levelLayerAdd(name, width, height) {
     return {
         type: TILESET_AREA.ADD_LAYER,
         payload: {
+            name,
             width,
             height
         }
@@ -79,7 +81,24 @@ export function setCurrentLayer(ind) {
     }
 }
 
-
+export function shiftLayer(ind, step) {
+    return function(dispatch) {
+        dispatch({
+            type: TILESET_AREA.LAYER_SHIFT,
+            payload: {
+                ind,
+                step
+            }
+        })
+        // TODO: WHAT THE FUCK
+        setTimeout(() => {
+            dispatch({
+                type: TILESET_AREA.LEVEL.RERENDER_NEED,
+                payload: {}
+            })
+        }, 1)
+    }
+}
 
 
 

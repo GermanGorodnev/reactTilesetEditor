@@ -1,5 +1,5 @@
 import { TILESET_AREA } from "constants.js"
-import {make2DArray} from "util.js"
+import {make2DArray, resize2DArray, median} from "util.js"
 
 const initialState = {
     width: window.innerWidth / 2,
@@ -42,12 +42,19 @@ export default function reducer(state = initialState, action) {
 
 
         case TILESET_AREA.LEVEL.SET_SIZE: {
+            const {newWidth, newHeight} = action.payload;
+            let newLayers = [...state.level.layers];
+            newLayers.forEach((layer) => {
+                console.log(layer);
+                layer.content = resize2DArray(layer.content, newHeight, newWidth, 0);
+            })
             return {
                 ...state,
                 level: {
                     ...state.level,
-                    width: action.payload.newWidth,
-                    height: action.payload.newHeight
+                    width: newWidth,
+                    height: newHeight,
+                    layers: newLayers
                 }
             }
         }
@@ -88,6 +95,7 @@ export default function reducer(state = initialState, action) {
                     layers: [
                         ...state.level.layers,
                         {
+                            name: action.payload.name,
                             content: make2DArray(levelH, levelW, 0),
                             visible: true, 
                         }
@@ -124,6 +132,20 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 currentLayer: action.payload.ind
+            }
+        }
+
+        case TILESET_AREA.LAYER_SHIFT: {
+            const {ind, step} = action.payload;
+            let newLayers = [...state.level.layers];
+            const newpos = median(0, ind + step, newLayers.length - 1);
+            [ newLayers[ind], newLayers[newpos] ] = [ newLayers[newpos], newLayers[ind] ];
+            return {
+                ...state,
+                level: {
+                    ...state.level,
+                    layers: newLayers
+                }
             }
         }
 

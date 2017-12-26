@@ -50,7 +50,7 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 tilesets: state.tilesets.map((tileset, ind) => {
-                    if (ind === state.currentTileset) {
+                    if (ind === action.payload.ind) {
                         return {
                             ...tileset,
                             tileW: action.payload.newWidth,
@@ -70,7 +70,7 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 tilesets: state.tilesets.map((tileset, ind) => {
-                    if (ind === state.currentTileset) {
+                    if (ind === action.payload.ind) {
                         return {
                             ...tileset,
                             tileH: action.payload.newHeight,
@@ -90,7 +90,7 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 tilesets: state.tilesets.map((tileset, ind) => {
-                    if (ind === state.currentTileset) {
+                    if (ind === action.payload.ind) {
                         return {
                             ...tileset,
                             tileOffsetX: action.payload.newOffsetX
@@ -109,7 +109,7 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 tilesets: state.tilesets.map((tileset, ind) => {
-                    if (ind === state.currentTileset) {
+                    if (ind === action.payload.ind) {
                         return {
                             ...tileset,
                             tileOffsetY: action.payload.newOffsetY
@@ -128,7 +128,7 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 tilesets: state.tilesets.map((tileset, ind) => {
-                    if (ind === state.currentTileset) {
+                    if (ind === action.payload.ind) {
                         return {
                             ...tileset,
                             tileSepX: action.payload.newSepX
@@ -147,7 +147,7 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 tilesets: state.tilesets.map((tileset, ind) => {
-                    if (ind === state.currentTileset) {
+                    if (ind === action.payload.ind) {
                         return {
                             ...tileset,
                             tileSepY: action.payload.newSepY
@@ -159,6 +159,22 @@ export default function reducer(state = initialState, action) {
                         };
                     }
                 })
+            }
+        }
+
+        case TILESET_LOADER.TILESETS_RECALCULATE_IDS: {
+            let newTilesets = [...state.tilesets];
+            newTilesets[0].firstgridid = 1;
+            for (let i = 1; i < newTilesets.length; i++) {
+                const prev = newTilesets[i - 1];
+                newTilesets[i].firstgridid = prev.firstgridid + 
+                    (Math.floor(prev.width / prev.tileW) * 
+                    Math.floor(prev.height / prev.tileH))
+            }
+
+            return {
+                ...state,
+                tilesets: newTilesets
             }
         }
 

@@ -34,3 +34,26 @@ export function make2DArray(rows, cols, defaultValue = 0) {
     }
     return arr;
 }
+
+
+export function resize2DArray(_arr, nrows, ncols, defaultValue = 0) {
+    var arr = [..._arr];
+    while(nrows > arr.length) {
+        let newrow = new Array(ncols);
+        newrow.fill(defaultValue);
+        arr.push(newrow);
+    }
+    arr.length = nrows;
+    // now fill the cols
+    arr.forEach((row) => {
+        while(ncols > row.length) {
+            row.push(defaultValue);
+        }
+        row.length = ncols;
+    });
+    return arr;
+}
+
+export function median(a, b, c) {
+    return Math.max(Math.min(a, b), Math.min(Math.max(a, b), c));
+}

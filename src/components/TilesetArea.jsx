@@ -16,7 +16,8 @@ import {
     levelRerenderNeed,
     levelRerenderSuccess,
 
-    setCurrentLayer
+    setCurrentLayer,
+    shiftLayer
 
 } from "../actions/tilesetAreaActions"
 import {renderGrid} from "util.js"
@@ -59,7 +60,8 @@ export default class TilesetArea extends React.Component {
                 h: 0
             },
             pen: undefined,
-            renderedLevel: undefined
+            renderedLevel: undefined,
+            renderedLayersList: undefined
         }
     }
     componentDidMount() {
@@ -69,7 +71,8 @@ export default class TilesetArea extends React.Component {
         if (newProps.needToRerender) {
             this.setState({
                 ...this.state,
-                renderedLevel: this.renderLevel()
+                renderedLevel: this.renderLevel(),
+                renderedLayersList: this.renderLayersList(),
             });           
             this.props.dispatch(levelRerenderSuccess());
         }
@@ -157,11 +160,21 @@ export default class TilesetArea extends React.Component {
     }
 
     onLayerListItemClick(event) {
-        const tg = event.target;
+        let tg = event.target;
+        if (!tg.hasAttribute("index"))
+            tg = tg.parentNode;
         this.props.dispatch(setCurrentLayer(Number(tg.getAttribute("index"))));
     }
 
+    layerShiftUp() {
+        this.props.dispatch(shiftLayer(this.props.currentLayer, -1));
+        this.props.dispatch(setCurrentLayer(Math.max(0, this.props.currentLayer - 1)));
+    }
 
+    layerShiftDown() {
+        this.props.dispatch(shiftLayer(this.props.currentLayer, 1));
+        this.props.dispatch(setCurrentLayer(Math.min(this.props.currentLayer + 1, this.props.level.layers.length - 1)));
+    }
 
 
 
@@ -172,7 +185,7 @@ export default class TilesetArea extends React.Component {
         // get current level width
         const lw = this.props.level.width;
         const lh = this.props.level.height;
-        this.props.dispatch(levelLayerAdd(lw, lh));
+        this.props.dispatch(levelLayerAdd("Layer " + (this.props.level.layers.length + 1).toString(), lw, lh));
     }
 
 
@@ -455,11 +468,11 @@ export default class TilesetArea extends React.Component {
                     key={index}
                     className={classes}
                     index={index}
-                    onClickCapture={(ev) => this.onLayerListItemClick(ev)}
+                    onClick={(ev) => this.onLayerListItemClick(ev)}
                 >
                     <p 
                         className="name"
-                    >{"Layer " + (index + 1).toString()}</p>
+                    >{layer.name}</p>
                     <input 
                         type="checkbox" 
                         defaultChecked={layer.visible}
@@ -508,6 +521,7 @@ export default class TilesetArea extends React.Component {
         }
 
         let layersList = this.renderLayersList();
+
         return (
             <ResizableBox 
                 className="tileset-area" 
@@ -548,6 +562,7 @@ export default class TilesetArea extends React.Component {
                                 name="levelW"
                                 onChange={(ev) => this.levelWidthChange(ev)}
                                 ref={(me) => this.iLevelW = me}
+                                defaultValue={3}
                             />
                         </div>
                         <div className="zone">
@@ -557,6 +572,7 @@ export default class TilesetArea extends React.Component {
                                 name="levelH"
                                 onChange={(ev) => this.levelHeightChange(ev)}
                                 ref={(me) => this.iLevelH = me}
+                                defaultValue={3}
                             />
                         </div>
                     </div>
@@ -569,6 +585,7 @@ export default class TilesetArea extends React.Component {
                                 name="tileW"
                                 onChange={(ev) => this.levelTileWidthChange(ev)}
                                 ref={(me) => this.iTileW = me}
+                                defaultValue={64}
                             />
                         </div>
                         <div className="zone">
@@ -578,9 +595,13 @@ export default class TilesetArea extends React.Component {
                                 name="tileH"
                                 onChange={(ev) => this.levelTileHeightChange(ev)}
                                 ref={(me) => this.iTileH = me}
+                                defaultValue={64}
                             />
                         </div>
                     </div>
+
+
+
 
                     <div className="layers-list">
                         <div className="layers-controller">
@@ -591,6 +612,18 @@ export default class TilesetArea extends React.Component {
                             >+</p>
                         </div>
                         {layersList}
+                        <div className="layers-instruments">
+                            <div className="updown">
+                                <p 
+                                    className="arrow"
+                                    onClick={(ev) => this.layerShiftUp()}
+                                >&uarr;</p>
+                                <p 
+                                    className="arrow"
+                                    onClick={(ev) => this.layerShiftDown()}
+                                >&darr;</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </ResizableBox>

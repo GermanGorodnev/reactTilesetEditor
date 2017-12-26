@@ -281,37 +281,37 @@ export default class TilesetSettings extends React.Component {
     tileWidthChange(event) {
         if (this.props.currentTileset === undefined)
             return;
-        this.props.dispatch(tilesetSetWidth(Number(event.target.value)));
+        this.props.dispatch(tilesetSetWidth(this.props.currentTileset, Number(event.target.value)));
     }
 
     tileHeightChange(event) {
         if (this.props.currentTileset === undefined)
             return;
-        this.props.dispatch(tilesetSetHeight(Number(event.target.value)));
+        this.props.dispatch(tilesetSetHeight(this.props.currentTileset, Number(event.target.value)));
     }
     
     offsetXchange(event) {
         if (this.props.currentTileset === undefined)
             return;
-        this.props.dispatch(tilesetSetOffsetX(Number(event.target.value)));
+        this.props.dispatch(tilesetSetOffsetX(this.props.currentTileset, Number(event.target.value)));
     }
 
     offsetYchange(event) {
         if (this.props.currentTileset === undefined)
             return;
-        this.props.dispatch(tilesetSetOffsetY(Number(event.target.value)));
+        this.props.dispatch(tilesetSetOffsetY(this.props.currentTileset, Number(event.target.value)));
     }
 
     sepXchange(event) {
         if (this.props.currentTileset === undefined)
             return;
-        this.props.dispatch(tilesetSetSepX(Number(event.target.value)));
+        this.props.dispatch(tilesetSetSepX(this.props.currentTileset, Number(event.target.value)));
     }
 
     sepYchange(event) {
         if (this.props.currentTileset === undefined)
             return;
-        this.props.dispatch(tilesetSetSepY(Number(event.target.value)));
+        this.props.dispatch(tilesetSetSepY(this.props.currentTileset, Number(event.target.value)));
     }
 
 
