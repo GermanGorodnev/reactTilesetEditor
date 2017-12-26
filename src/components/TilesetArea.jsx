@@ -129,7 +129,7 @@ export default class TilesetArea extends React.Component {
                 const mouse = this.stageNode.getStage().getPointerPosition();
                 let xtile = Math.floor(mouse.x / level.tileW);
                 let ytile = Math.floor(mouse.y / level.tileH);
-                
+
                 for (let j = 0; j < penArea.tileHeight; j++) {
                     for (let i = 0; i < penArea.tileWidth; i++) {
                         this.props.dispatch(levelPlaceTile(
@@ -158,8 +158,6 @@ export default class TilesetArea extends React.Component {
 
     onLayerListItemClick(event) {
         const tg = event.target;
-        console.log(tg);
-        console.log(Number(tg.getAttribute("index")))
         this.props.dispatch(setCurrentLayer(Number(tg.getAttribute("index"))));
     }
 
@@ -333,16 +331,16 @@ export default class TilesetArea extends React.Component {
                         const xoff = (tile - tileset.firstgridid -0) % tileset.tileWidth;
                         const yoff = ~~((tile - tileset.firstgridid -0) / tileset.tileWidth);
                         const clipArea = {
-                            x: (tileset.tileW + tileset.tileOffsetX) * (xoff ),
-                            y: (tileset.tileH + tileset.tileOffsetY) * (yoff ),
+                            x: (tileset.tileW + tileset.tileSepX) * (xoff ),
+                            y: (tileset.tileH + tileset.tileSepY) * (yoff ),
                             width: tileset.tileW,
                             height: tileset.tileH
                         }
                         tiles.push(
                             <Group
                                 clip={clipArea}
-                                x={ti * tileset.tileW - clipArea.x}
-                                y={rowi * tileset.tileH - clipArea.y}
+                                x={ti * level.tileW - clipArea.x}
+                                y={rowi * level.tileH - clipArea.y}
                                 key={GROUP}
                             >
                                 <Image
@@ -368,40 +366,77 @@ export default class TilesetArea extends React.Component {
     }
 
     renderPen() {
-        const {penArea, level} = this.props; 
-        const {tilesets, currentTileset} = this.props;
+        const {penArea, level, tilesets, currentTileset} = this.props; 
         const image = tilesets[currentTileset] ? tilesets[currentTileset] : undefined;
+
+        if ((penArea.tileWidth === 0) && (penArea.tileHeight === 0)) {
+            return;
+        }
         if (image === undefined) {
             return;
         }
-        const mouse = this.stageNode.getStage().getPointerPosition();
-        if (mouse === undefined) 
+
+        if (this.stageNode === undefined) {
             return;
-        if (penArea.tileWidth === 0
-            && penArea.tileHeight === 0)
-            return;
-        console.log("PEN AREA", penArea);
-        const clipArea = {
-            x: penArea.tileX * image.tileW,
-            y: penArea.tileY * image.tileH,
-            width: penArea.tileWidth * image.tileW,
-            height: penArea.tileHeight * image.tileH
         }
-        console.log("CLIP AREA", clipArea);
-        return (
-            <Group
-                clip={
-                    clipArea
+        const mouse = this.stageNode.getStage().getPointerPosition();
+
+        let penTiles = [];
+        let GROUP_INDEX = 0;
+        const xstart = Math.floor(mouse.x / level.tileW); //* level.tileW - clipArea.x
+        const ystart = Math.floor(mouse.y / level.tileH); //* level.tileH - clipArea.y
+        // iterate over TILES in PEN
+        for (let i = 0; i < penArea.tileWidth; i++) {
+            for (let j = 0; j < penArea.tileHeight; j++) {
+                // now render each tile on place
+                let clipArea = {
+                    x: image.tileOffsetX + (penArea.tileX + i) * image.tileW,
+                    y: image.tileOffsetY + (penArea.tileY + j) * image.tileH,
+                    width: image.tileW,
+                    height: image.tileH
                 }
-                x={Math.floor(mouse.x / level.tileW) * level.tileW - clipArea.x}
-                y={Math.floor(mouse.y / level.tileH) * level.tileH - clipArea.y}
-            >
-                <Image
-                    image={image.imageObject}
-                    width={image.width}
-                    height={image.height}
-                />
-            </Group>
+                penTiles.push(
+                    <Group
+                        clip={clipArea}
+                        x={(xstart + i) * level.tileW - clipArea.x}
+                        y={(ystart + j) * level.tileH - clipArea.y}
+                        key={GROUP_INDEX}
+                    >
+                        <Image
+                            image={image.imageObject}
+                            width={image.width}
+                            height={image.height}
+                        />
+                    </Group>
+                )
+                GROUP_INDEX++;
+            }
+        }
+        
+        // const xoff = (tile - tileset.firstgridid -0) % tileset.tileWidth;
+        // const yoff = ~~((tile - tileset.firstgridid -0) / tileset.tileWidth);
+        // const clipArea = {
+        //     x: (tileset.tileW + tileset.tileOffsetX) * (xoff ),
+        //     y: (tileset.tileH + tileset.tileOffsetY) * (yoff ),
+        //     width: tileset.tileW,
+        //     height: tileset.tileH
+        // }
+        // tiles.push(
+        //     <Group
+        //         clip={clipArea}
+        //         x={ti * level.tileW - clipArea.x}
+        //         y={rowi * level.tileH - clipArea.y}
+        //         key={GROUP}
+        //     >
+        //         <Image
+        //             image={tileset.imageObject}
+        //             width={tileset.width}
+        //             height={tileset.height}
+        //         />
+        //     </Group>
+        // )
+        return (
+            penTiles
         )
     }
 
@@ -450,7 +485,7 @@ export default class TilesetArea extends React.Component {
             0, 0, 0, 0
         );
         // CURRENT LEVEL AS-IS
-        const levelRepresentation = this.state.renderedLevel || undefined;
+        const levelRepresentation = this.state.renderedLevel;
         // CURRENT CHOOSEN AREA IF NEEDED
         const currentArea = this.renderArea();
 
@@ -469,7 +504,7 @@ export default class TilesetArea extends React.Component {
 
         let instrumentRender = undefined;
         if (instrument === TILESET_AREA.INSTR.PEN) {
-            instrumentRender = (this.state.pen) || (undefined);
+            instrumentRender = (this.state.pen);
         }
 
         let layersList = this.renderLayersList();
@@ -497,11 +532,13 @@ export default class TilesetArea extends React.Component {
                     <Layer>
                         {grid}
                     </Layer>
-                        {levelRepresentation}
+                    {levelRepresentation}
                     <Layer>
                         {instrumentRender}
                     </Layer>
                 </Stage>
+
+
                 <div className="level-params">
                     <div className="zone-wrap">
                         <div className="zone">
