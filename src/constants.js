@@ -8,9 +8,27 @@ export const APP = {
     },
     
     STATE: {
-        EDIT: "EDIT"
-    }  
+        EDIT: "EDIT",
+        MODAL: "MODAL"
+    },
+    
+    MENU: {
+        FILE: {
+            NEW: "NEW",
+            SAVE: "SAVE",
+            LOAD: "LOAD"
+        },
+        TOOLS: {
+            SHIFT_LAYER: "SHIFT_LAYER"
+        }
+    }
 } 
+
+export const MODAL_WINDOWS = {
+    ADD_MODAL: "ADD_MODAL",
+    DISABLE_ALL: "DISABLE_ALL_MODALS",
+    CLOSE: "CLOSE_MODALS"
+}
 
 export const TILESET_AREA = {
     SET_SIZE: "SET_SIZE",
@@ -22,16 +40,20 @@ export const TILESET_AREA = {
         RERENDER_SUCCESS: "LEVEL_RERENDER_SUCCESS",
         RERENDER_NEED: "LEVEL_NEED_RERENDER",
     },
-    INSTR: {
+    TOOL: {
         PEN: "PEN",
         ERASE: "ERASE",
-        SET_INSTR: "SET_INSTR"
+        SET_TOOL: "SET_TOOL"
     },
+
+    TOGGLE_PARAMS_WINDOW: "TOGGLE_PARAMS_WINDOW",
 
     ADD_LAYER: "ADD_LAYER",
     LAYER_SET_VISIBLE: "LAYER_SET_VISIBLE",
     LAYER_SET_CURRENT: "LAYER_SET_CURRENT",
-    LAYER_SHIFT: "LAYER_SHIFT"
+    LAYER_SHIFT: "LAYER_SHIFT",
+    LAYER_SHIFT_BY_TILE: "LAYER_SHIFT_BY_TILE",
+    LAYER_SHIFT_BY_TILE_ALL: "LAYER_SHIFT_BY_TILE_ALL",
 }
 
 export const TILESET_LOADER = {

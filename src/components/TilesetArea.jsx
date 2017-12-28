@@ -17,11 +17,14 @@ import {
     levelRerenderSuccess,
 
     setCurrentLayer,
-    shiftLayer
+    shiftLayer,
+
+    showLevelParams
 
 } from "../actions/tilesetAreaActions"
 import {renderGrid} from "util.js"
 import { TILESET_AREA } from "../constants";
+import Menu from "components/Menu"
 
 @connect((store) => {
     return {
@@ -31,11 +34,13 @@ import { TILESET_AREA } from "../constants";
         level: store.tilesetArea.level,
         currentLayer: store.tilesetArea.currentLayer,
 
-        instrument: store.tilesetArea.instrument,
+        tool: store.tilesetArea.tool,
         penArea: store.tilesetArea.penArea,
 
         needToRerender: store.tilesetArea.needToRerender,
         renderedLevel: store.tilesetArea.renderedLevel,
+
+        showLevelParams: store.tilesetArea.showLevelParams,
 
         tilesets: store.tilesetLoader.tilesets,
         currentTileset: store.tilesetLoader.currentTileset,
@@ -66,6 +71,10 @@ export default class TilesetArea extends React.Component {
     }
     componentDidMount() {
         window.addEventListener("resize", () => this.onWindowResize());
+        this.props.dispatch(levelRerenderNeed());
+    }
+    componentWillUnmount() {
+        window.removeEventListener("resize", () => this.onWindowResize())
     }
     componentWillReceiveProps(newProps) {
         if (newProps.needToRerender) {
@@ -77,6 +86,24 @@ export default class TilesetArea extends React.Component {
             this.props.dispatch(levelRerenderSuccess());
         }
     }
+
+
+
+
+    saveToFile() {
+
+    }
+
+    loadFromFile() {
+        
+    }
+
+
+
+
+
+
+
 
 
 
@@ -114,12 +141,12 @@ export default class TilesetArea extends React.Component {
     }
 
     onCanvasClick(event) {
-        if (this.props.level.layers.length === 0) {
-            // || this.props.currentLayer === undefined) {
+        if (this.props.level.layers.length === 0
+             || this.props.currentLayer === undefined) {
             return;
         }
-        switch (this.props.instrument) {
-            case TILESET_AREA.INSTR.PEN: {
+        switch (this.props.tool) {
+            case TILESET_AREA.TOOL.PEN: {
                 // place the tile
                 const {tilesets, currentTileset, level, penArea, currentLayer} = this.props;
 
@@ -161,6 +188,9 @@ export default class TilesetArea extends React.Component {
 
     onLayerListItemClick(event) {
         let tg = event.target;
+        if (tg.nodeName === "INPUT") {
+            return;
+        }
         if (!tg.hasAttribute("index"))
             tg = tg.parentNode;
         this.props.dispatch(setCurrentLayer(Number(tg.getAttribute("index"))));
@@ -176,7 +206,9 @@ export default class TilesetArea extends React.Component {
         this.props.dispatch(setCurrentLayer(Math.min(this.props.currentLayer + 1, this.props.level.layers.length - 1)));
     }
 
-
+    toggleParams() {
+        this.props.dispatch(showLevelParams(!this.props.showLevelParams));
+    }
 
 
 
@@ -425,29 +457,7 @@ export default class TilesetArea extends React.Component {
                 GROUP_INDEX++;
             }
         }
-        
-        // const xoff = (tile - tileset.firstgridid -0) % tileset.tileWidth;
-        // const yoff = ~~((tile - tileset.firstgridid -0) / tileset.tileWidth);
-        // const clipArea = {
-        //     x: (tileset.tileW + tileset.tileOffsetX) * (xoff ),
-        //     y: (tileset.tileH + tileset.tileOffsetY) * (yoff ),
-        //     width: tileset.tileW,
-        //     height: tileset.tileH
-        // }
-        // tiles.push(
-        //     <Group
-        //         clip={clipArea}
-        //         x={ti * level.tileW - clipArea.x}
-        //         y={rowi * level.tileH - clipArea.y}
-        //         key={GROUP}
-        //     >
-        //         <Image
-        //             image={tileset.imageObject}
-        //             width={tileset.width}
-        //             height={tileset.height}
-        //         />
-        //     </Group>
-        // )
+
         return (
             penTiles
         )
@@ -487,7 +497,7 @@ export default class TilesetArea extends React.Component {
 
     render() {
         const {height} = this.props;
-        const {level, instrument} = this.props;
+        const {level, tool} = this.props;
         const levelRW = level.width * level.tileW;
         const levelRH = level.height * level.tileH;
 
@@ -515,13 +525,13 @@ export default class TilesetArea extends React.Component {
             alignItems: tilesetAreaStyle.alignItems,
         }
 
-        let instrumentRender = undefined;
-        if (instrument === TILESET_AREA.INSTR.PEN) {
-            instrumentRender = (this.state.pen);
+        let toolRender = undefined;
+        if (tool === TILESET_AREA.TOOL.PEN) {
+            toolRender = (this.state.pen);
         }
 
         let layersList = this.renderLayersList();
-
+        const HIDE = ((!this.props.showLevelParams) ? " hide" : "");
         return (
             <ResizableBox 
                 className="tileset-area" 
@@ -548,12 +558,18 @@ export default class TilesetArea extends React.Component {
                     </Layer>
                     {levelRepresentation}
                     <Layer>
-                        {instrumentRender}
+                        {toolRender}
                     </Layer>
                 </Stage>
 
 
-                <div className="level-params">
+                <p 
+                    className="collapse"
+                    onClick={(ev) => this.toggleParams(ev)}
+                >—
+                </p>
+                <div className={"level-params" + HIDE}>
+
                     <div className="zone-wrap">
                         <div className="zone">
                             <p className="input-name">Level W</p>
@@ -612,7 +628,7 @@ export default class TilesetArea extends React.Component {
                             >+</p>
                         </div>
                         {layersList}
-                        <div className="layers-instruments">
+                        <div className="layers-tools">
                             <div className="updown">
                                 <p 
                                     className="arrow"
@@ -626,6 +642,8 @@ export default class TilesetArea extends React.Component {
                         </div>
                     </div>
                 </div>
+
+                <Menu />
             </ResizableBox>
         );
     }

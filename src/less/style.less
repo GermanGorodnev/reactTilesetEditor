@@ -44,11 +44,102 @@ html {
     }
 }
 
+
+
 .app {
     display: flex;
     flex-direction: row;
+    position: relative;
 }
 
+@keyframes fadeout {
+    0% {background-color: rgba(0, 0, 0 , @max-alpha);}
+    100% {background-color: rgba(0, 0, 0 , 0);}
+}
+.modals-controller {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0 , 0);
+    transition: background-color 1s ease;
+    
+    &.inactive {
+        display: none;
+    }
+
+    &.active {
+        animation: fadeout;
+        animation-duration: .5s;
+        animation-direction: reverse;
+        display: flex;
+        background-color: rgba(0, 0, 0 , @max-alpha);
+    }
+
+    &.closing {
+        animation: fadeout;
+        animation-duration: 1s;
+    }
+}
+
+
+.modal-window {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+
+    .modal-content {
+        background-color: #fff;
+        border: 3px solid #000;
+        p, label {
+            margin: .15rem;
+            font: 1.4rem @main-font;
+        }
+
+        .zone-wrap {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            input {
+                font: 1rem @main-font;
+            }
+            .zone {
+                display: inline-flex;
+                flex-flow: column nowrap;
+            }
+            
+        }
+
+
+        .button-apply {
+            display: block;
+            width: 50%;
+            margin: 12px auto 5px;
+            text-align: center;
+            border-radius: 20px;
+            background-color: #f34;
+            color: #fff;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+    }
+}
+
+.shift-layer {
+    .modal-content {
+        width: 35%;
+        padding: 20px;
+
+        label {
+            .unselectable();
+        }
+    }
+}
 
 
 
@@ -57,8 +148,17 @@ html {
     height: 100vh;
     overflow: hidden;   
     display: flex;  
+    position: relative;
     flex-direction: column;
-    
+    .collapse {
+        .unselectable();
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin: 0;
+        cursor: pointer;
+        z-index: 2;
+    }    
     .canvas-wrapper {
         display: flex;
         flex-direction: column;
@@ -68,6 +168,102 @@ html {
 
         .nolayers {
             font-size: 2rem;
+        }
+    }
+
+    .menu {
+        .unselectable();
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: inline-flex;
+        flex-flow: row nowrap;
+        justify-content: flex-start;
+
+        .menu-wrap {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: flex-start;
+        }
+        
+        .menu-item {
+            &:nth-child(1) {
+                p.name {
+                    border-left: 2px solid #000;
+                }
+            }
+
+            &.curr {
+                p.name {
+                    background-color: rgb(219, 7, 7);
+                    color: #fff;
+                    border-bottom: none;
+                }
+            }
+
+            p {
+                font: 1.1rem @main-font;
+                cursor: pointer;
+            }
+    
+            p.name {
+                margin: 0;
+                padding: 5px 12px;
+                background-color: #fff;
+                border: 2px solid #000;
+                border-left: none;
+                cursor: pointer;
+                &:hover {
+                    background-color: @menu-choosen-col;
+                    color: #fff;
+                }
+            }
+        }
+
+        &.hide {
+            display: none;
+        }
+
+        .content {
+            background-color: #fff;
+            padding: 0;
+            outline: 2px solid #000;
+            display: flex;
+            flex-flow: column nowrap;
+            position: absolute;
+            top: 35px;
+            margin-left: 0;
+
+            &.hide {
+                display: none;
+            }
+
+            .menu-content-item {
+                margin: 0;
+                padding: 4px 15px;          
+                width: 100px;
+                color: #000;
+                &:hover {
+                    background-color: @menu-choosen-col;
+                    color: #fff;
+                }
+            }
+        }
+
+
+        .tools {
+            display: flex;
+            flex-flow: row nowrap;
+
+            .tool {
+                background-color: #fff;
+                height: 35px;
+                cursor: pointer;
+
+                &.current, &:hover {
+                    background-color: @menu-choosen-col;
+                }
+            }
         }
     }
 
@@ -81,6 +277,12 @@ html {
         background-color: #fff;
         padding: 0 1px;
         border: 2px solid #000;
+
+        &.hide {
+            display: none;
+        }
+
+
 
         .zone-wrap {
             display: flex;
@@ -110,15 +312,17 @@ html {
                 flex-flow: row nowrap;
                 justify-content: space-between;
                 cursor: pointer;
+                margin: 2px 0;
                 &.current-layer {
-                    border: 2px solid rgb(172, 29, 29);
+                    outline: 2px solid rgb(172, 29, 29);
+                    
                 }
                 input {
                     margin-right: 8px;
                 }
             }
 
-            .layers-instruments {
+            .layers-tools {
                 display: flex;
                 flex-flow: row nowrap;
                 justify-content: space-between;
@@ -228,6 +432,7 @@ html {
 
         .tileset-config {
             width: 25%;
+            
             .zone-wrap {
                 display: flex;
                 flex-flow: row nowrap;
@@ -238,6 +443,7 @@ html {
                     }
                 }
             }
+
             p {
                 margin: .1em;
                 font: 1.1rem @main-font;

@@ -2,14 +2,15 @@ import { APP } from "constants.js"
 
 const initialState = {
     language: APP.LANG.RUS,
-    state: undefined
+    appState: undefined,
+    modalWindowActive: false
 };
 export default function reducer(state = initialState, action) {
     switch (action.type) {
         case APP.SET_STATE: {
             return {
                 ...state,
-                state: action.payload.newState
+                appState: action.payload.newState
             }
         }
 

@@ -1,5 +1,10 @@
 import { TILESET_AREA } from "constants.js"
-import {make2DArray, resize2DArray, median} from "util.js"
+import {
+    make2DArray, 
+    resize2DArray, 
+    shift2DArray,
+    median
+} from "util.js"
 
 const initialState = {
     width: window.innerWidth / 2,
@@ -12,12 +17,10 @@ const initialState = {
         tileW: 64, 
         tileH: 64,
         layers: [], // array of objects
-        textures: {},
-        currentLayer: 0
     },
     needToRerender: false,
 
-    instrument: TILESET_AREA.INSTR.PEN,
+    tool: TILESET_AREA.TOOL.PEN,
     penArea: {
         // left top edge in tiles
         tileX: 0,
@@ -26,7 +29,8 @@ const initialState = {
         tileHeight: 0
     },
     
-    currentLayer: undefined
+    currentLayer: undefined,
+    showLevelParams: true
 
 };
 
@@ -45,7 +49,6 @@ export default function reducer(state = initialState, action) {
             const {newWidth, newHeight} = action.payload;
             let newLayers = [...state.level.layers];
             newLayers.forEach((layer) => {
-                console.log(layer);
                 layer.content = resize2DArray(layer.content, newHeight, newWidth, 0);
             })
             return {
@@ -82,7 +85,12 @@ export default function reducer(state = initialState, action) {
             }
         }
 
-
+        case TILESET_AREA.TOGGLE_PARAMS_WINDOW: {
+            return {
+                ...state,
+                showLevelParams: action.payload.toggle
+            }
+        }
 
 
         case TILESET_AREA.ADD_LAYER: {
@@ -150,6 +158,36 @@ export default function reducer(state = initialState, action) {
         }
 
 
+        case TILESET_AREA.LAYER_SHIFT_BY_TILE: {
+            const {ind, xoff, yoff} = action.payload;
+            return {
+                ...state,
+                level: {
+                    ...state.level,
+                    layers: state.level.layers.map((layer, i) => {
+                        let n = {...layer};
+                        if (i === ind)
+                            n.content = shift2DArray(n.content, xoff, yoff)
+                        return n;
+                    })
+                }
+            }
+        }
+
+        case TILESET_AREA.LAYER_SHIFT_BY_TILE_ALL: {
+            const {xoff, yoff} = action.payload;
+            return {
+                ...state,
+                level: {
+                    ...state.level,
+                    layers: state.level.layers.map((layer) => {
+                        let n = {...layer};
+                        n.content = shift2DArray(n.content, xoff, yoff)
+                        return n;
+                    })
+                }
+            }
+        }
 
 
         case TILESET_AREA.LEVEL.RERENDER_NEED: {
@@ -186,6 +224,17 @@ export default function reducer(state = initialState, action) {
                     ...state.level,
                     layers: newLayers,
                 }
+            }
+        }
+
+
+
+
+
+        case TILESET_AREA.TOOL.SET_TOOL: {
+            return {
+                ...state,
+                tool: action.payload.newTool
             }
         }
 

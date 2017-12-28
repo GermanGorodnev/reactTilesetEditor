@@ -1,16 +1,17 @@
 import React from "react"
-import { connect } from "react-redux"
-
+import {connect} from "react-redux"
 import { appInit } from "../actions/appActions"
 
 import TilesetArea from "./TilesetArea"
 import Toolmap from "./Toolmap"
+import ModalWindows from "./ModalWindows"
 
 
 @connect((store) => {
     return {
         language: store.app.language,
-        state: store.app.state
+        appState: store.app.appState,
+        modalWindowActive: store.app.modalWindowActive
     }
 })
 export default class App extends React.Component {
@@ -23,6 +24,9 @@ export default class App extends React.Component {
             <div className="app">
                 <TilesetArea />
                 <Toolmap />
+                <ModalWindows 
+                    
+                />
             </div>
         );
     }
