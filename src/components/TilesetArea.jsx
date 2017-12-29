@@ -2,6 +2,7 @@ import React from "react"
 import { connect } from "react-redux"
 import { ResizableBox } from "react-resizable"
 import {Stage, Layer, Rect, Group, Image, Text} from "react-konva"
+import FileSaver from "file-saver"
 
 import { 
     setAreaSize, 
@@ -19,7 +20,10 @@ import {
     setCurrentLayer,
     shiftLayer,
 
-    showLevelParams
+    showLevelParams,
+
+    triggerSave,
+    triggerLoad
 
 } from "../actions/tilesetAreaActions"
 import {renderGrid} from "util.js"
@@ -42,9 +46,11 @@ import Menu from "components/Menu"
 
         showLevelParams: store.tilesetArea.showLevelParams,
 
+        saveTrigger: store.tilesetArea.saveTrigger,
+        loadTrigger: store.tilesetArea.loadTrigger,
+
         tilesets: store.tilesetLoader.tilesets,
         currentTileset: store.tilesetLoader.currentTileset,
-
     }
 })
 export default class TilesetArea extends React.Component {
@@ -85,13 +91,29 @@ export default class TilesetArea extends React.Component {
             });           
             this.props.dispatch(levelRerenderSuccess());
         }
+        if (newProps.saveTrigger) {
+            const save = this.saveToFile();
+            const json = JSON.stringify(save);
+            var blob = new Blob([json], {type: "application/json"});
+            FileSaver.saveAs(blob, "rteSave.json");
+            setTimeout(() => {
+                this.props.dispatch(triggerSave(false));
+            }, 10);
+        }
     }
 
 
-
-
     saveToFile() {
-
+        let save = {
+            tilesets: [],
+            level: undefined
+        };
+        // save images
+        for (let tileset of this.props.tilesets) {
+            save.tilesets.push(tileset);
+        }
+        save.level = this.props.level;
+        return save;
     }
 
     loadFromFile() {
@@ -334,7 +356,7 @@ export default class TilesetArea extends React.Component {
         const stage = this.stageNode.getStage();
         if (level.layers.length === 0)
         {
-            console.log("fail to render!", 'background: #222; color: #bada55')
+            console.log("fail to render!")
             return (
                 <Layer>
                     <Text 

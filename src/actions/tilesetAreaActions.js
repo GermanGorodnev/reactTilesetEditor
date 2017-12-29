@@ -79,6 +79,15 @@ export function levelLayerAdd(name, width, height) {
     } 
 }
 
+export function levelLayerLoad(layer) {
+    return {
+        type: TILESET_AREA.LOAD_LAYER,
+        payload: {
+            layer
+        }
+    }
+}
+
 export function levelLayerSetVisible(ind, val) {
     return function(dispatch) {
         dispatch({
@@ -221,3 +230,33 @@ export function setTool(newTool) {
 }
 
 
+export function triggerSave(toggle) {
+    return {
+        type: TILESET_AREA.TRIGGER_SAVE,
+        payload: {
+            toggle
+        }
+    }
+}
+
+export function triggerLoad(toggle) {
+    return {
+        type: TILESET_AREA.TRIGGER_LOAD,
+        payload: {
+            toggle
+        }
+    }
+}
+
+
+export function loadLevel(level) {
+    console.log("start lo load", level);
+    return function(dispatch) {
+        dispatch(levelSetSize(level.width, level.height));
+        dispatch(levelSetTileSize(level.tileW, level.tileH));
+        for (let layer of level.layers) {
+            console.log("LAYER", layer);
+            dispatch(levelLayerLoad(layer));
+        }
+    }
+}

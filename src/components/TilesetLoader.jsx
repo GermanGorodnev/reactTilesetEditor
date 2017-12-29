@@ -105,6 +105,7 @@ export default class TilesetLoader extends React.Component {
                         name="files[]"
                         ref={(input) => {this.fileInput = input;}}
                         multiple
+                        accept="image/*"
                     />
                     <div onClick={() => this.loadTileset()} className="button button-load-tileset">{Translate.LOAD_TILESET}</div>
                 </div>

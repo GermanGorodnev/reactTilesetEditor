@@ -1,6 +1,7 @@
 import { APP } from "constants.js"
 
 
+
 export function setState(newState) {
     return {
         type: APP.SET_STATE,
@@ -12,6 +13,14 @@ export function setState(newState) {
 
 export function appInit() {
     return function(dispatch) {
-        setState(APP.STATE.EDIT);        
+        dispatch(setState(APP.STATE.EDIT));        
+    }
+}
+
+
+export function appNew() {
+    // TODO: CLEAR THE APP COMPLETELY
+    return function(dispatch) {
+        //dispatch()
     }
 }

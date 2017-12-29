@@ -1,9 +1,11 @@
 import React from "react"
 import { connect } from "react-redux"
-import FileSaver from "file-saver"
 
-import { setTool } from "actions/tilesetAreaActions"
+import { setTool, triggerSave, triggerLoad, loadLevel } from "actions/tilesetAreaActions"
 import { addModal } from "actions/modalWindowsActions"
+import { appNew } from "actions/appActions"
+import { loadTileset } from "actions/tilesetLoaderActions"
+
 import { APP, TILESET_AREA } from "constants.js"
 
 
@@ -20,6 +22,11 @@ export default class Menu extends React.Component {
             currentMenu: "none"
         }
     }
+
+    componentDidMount() {
+        const li = this.loadInput;
+        this.loadInput.addEventListener("change", (ev) => this.onFileChoose.call(this, ev, li));
+    }   
 
     componentWillMount() {
         document.addEventListener("mousedown", (ev) => this.onMouseClick(ev));
@@ -38,6 +45,7 @@ export default class Menu extends React.Component {
                     currentMenu: "none"
                 })
             } else {
+
             }
         }
     }
@@ -57,42 +65,71 @@ export default class Menu extends React.Component {
         });
     }
 
-    onMenuButtonClick(event) {
-        let t = event.target;
-        const action = t.getAttribute("action");
-        switch (action) {
-            case APP.MENU.FILE.NEW: {
-                // clear all
-                break;
+    onButtonNewClick(event) {
+
+    }
+
+    onButtonSaveClick(event) {
+        this.props.dispatch(triggerSave(true));
+    }
+
+    onButtonLoadClick(event) {
+        if (this.loadInput) {
+            this.loadInput.click();
+        }
+        event.preventDefault();
+    }
+
+    onFileChoose(event, inputLoad) {
+        const files = inputLoad.files;
+        for (let file of files) {
+            if (!file.name.match(".json")) {
+                // TODO: Pretty error
+                console.log("wrong format:", file);
+                continue;
             }
-            case APP.MENU.FILE.SAVE: {
-                // save 
-                var myjson= JSON.stringify({
-                    a: 3,
-                    b: 5
-                });
-                var blob = new Blob([myjson], {type: "application/json"});
-                FileSaver.saveAs(blob, "my_outfile.json");
-                break;
+            var reader = new FileReader();
+
+            reader.onload = (event) => {
+                const res = event.target.result;    
+                // now get the js object
+                const obj = JSON.parse(res); 
+                inputLoad.value = "";
+                // clear the app
+                this.props.dispatch(appNew);
+                console.log(obj);
+                // load tilesets
+                for (let tileset of obj.tilesets) {
+                    tileset.image = tileset.image.replace(/(\r\n|\n|\r)/gm,"");
+                    let IMG = new Image();
+                    IMG.src = tileset.image;                      
+                    IMG.onload = () => {
+                        this.props.dispatch(loadTileset(
+                            {
+                                ...tileset,
+                                image: IMG
+                            }
+                        ));
+                    }
+                }
+                // load level
+                this.props.dispatch(loadLevel(
+                    obj.level
+                ));
             }
             
-            case APP.MENU.FILE.LOAD: {
-                break;
-            }
-
-            default: {
-                break;
-            }
+            reader.readAsText(file);
         }
     }
+
 
     onToolClick(event) {
         let t = event.target;
         if (t.nodeName === "IMG") {
             t = t.parentNode;
         }
-        const toolName = t.getAttribute("toolName");
-        this.props.dispatch(setTool(toolName));
+        const toolname = t.getAttribute("toolname");
+        this.props.dispatch(setTool(toolname));
     }
 
     onShiftLayerClick(event) {
@@ -123,19 +160,27 @@ export default class Menu extends React.Component {
                         >
                             <p 
                                 className="menu-content-item"
-                                onClick={(ev) => this.onMenuButtonClick(ev)}
+                                onClick={(ev) => this.onButtonNewClick(ev)}
                                 action={APP.MENU.FILE.NEW}
                             >New</p>
                             <p 
                                 className="menu-content-item"
-                                onClick={(ev) => this.onMenuButtonClick(ev)}
+                                onClick={(ev) => this.onButtonSaveClick(ev)}
                                 action={APP.MENU.FILE.SAVE}
                             >Save</p>
-                            <p
-                                className="menu-content-item" 
-                                onClick={(ev) => this.onMenuButtonClick(ev)}
-                                action={APP.MENU.FILE.LOAD}
-                            >Load</p>
+                            <div>
+                                <input 
+                                    type="file" 
+                                    className="input-file-invis" 
+                                    accept=".json" 
+                                    ref={(me) => this.loadInput = me}
+                                />
+                                <p
+                                    className="menu-content-item" 
+                                    onClick={(ev) => this.onButtonLoadClick(ev)}
+                                    action={APP.MENU.FILE.LOAD}
+                                >Load</p>
+                            </div>
                         </div>
                     </div>
 
@@ -152,7 +197,7 @@ export default class Menu extends React.Component {
                                 className="menu-content-item"
                                 onClick={(ev) => this.onShiftLayerClick(ev)}
                                 action={APP.MENU.TOOLS.SHIFT_LAYER}
-                            >Shift Layer</p>
+                            >Shift Layer(s)</p>
                         </div>
                     </div>
                 </div>
@@ -163,14 +208,14 @@ export default class Menu extends React.Component {
                 >
                     <div 
                         className={"tool" + ((this.props.tool === TILESET_AREA.TOOL.PEN) ? " current" : "")} 
-                        toolName={TILESET_AREA.TOOL.PEN}
+                        toolname={TILESET_AREA.TOOL.PEN}
                         onClick={(ev) => this.onToolClick(ev)}
                     >
                         <img src={require("images/icons/pen.png")} alt="Pen"/>
                     </div>
                     <div 
                         className={"tool" + ((this.props.tool === TILESET_AREA.TOOL.ERASE) ? " current" : "")} 
-                        toolName={TILESET_AREA.TOOL.ERASE}
+                        toolname={TILESET_AREA.TOOL.ERASE}
                         onClick={(ev) => this.onToolClick(ev)}
                     >
                         <img src={require("images/icons/erase.png")} alt="Eraser"/>

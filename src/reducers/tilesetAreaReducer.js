@@ -30,7 +30,10 @@ const initialState = {
     },
     
     currentLayer: undefined,
-    showLevelParams: true
+    showLevelParams: true,
+
+    loadTrigger: false,
+    saveTrigger: false,
 
 };
 
@@ -106,6 +109,22 @@ export default function reducer(state = initialState, action) {
                             name: action.payload.name,
                             content: make2DArray(levelH, levelW, 0),
                             visible: true, 
+                        }
+                    ]
+                }
+            }
+        }
+
+
+        case TILESET_AREA.LOAD_LAYER: {
+            return {
+                ...state,
+                level: {
+                    ...state.level,
+                    layers: [
+                        ...state.level.layers,
+                        {
+                            ...action.payload.layer
                         }
                     ]
                 }
@@ -237,6 +256,21 @@ export default function reducer(state = initialState, action) {
                 tool: action.payload.newTool
             }
         }
+
+
+        case TILESET_AREA.TRIGGER_SAVE: {
+            return {
+                ...state,
+                saveTrigger: action.payload.toggle
+            }
+        }
+        case TILESET_AREA.TRIGGER_LOAD: {
+            return {
+                ...state,
+                loadTrigger: action.payload.toggle
+            }
+        }
+        
 
         default:
             break;
