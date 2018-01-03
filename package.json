@@ -102,5 +102,6 @@
   },
   "devDependencies": {
     "babel-plugin-transform-decorators-legacy": "^1.3.4"
-  }
+  },
+  "homepage": "https://germangorodnev.com/editor"
 }

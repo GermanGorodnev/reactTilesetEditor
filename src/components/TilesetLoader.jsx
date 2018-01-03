@@ -29,6 +29,7 @@ export default class TilesetLoader extends React.Component {
     loadTileset() {
         const {files} = this.fileInput;
         const {tilesets} = this.props; 
+        const START_SIZE = 64;
 
         let firstGridId = 0;
             if (tilesets.length === 0) {
@@ -37,8 +38,8 @@ export default class TilesetLoader extends React.Component {
             } else {
                 const lasttileset = tilesets[tilesets.length - 1];
                 firstGridId = lasttileset.firstgridid +
-                    (Math.floor(lasttileset.width / lasttileset.tileW) * 
-                    Math.floor(lasttileset.height / lasttileset.tileH));
+                    (Math.ceil(lasttileset.width / lasttileset.tileW) * 
+                    Math.ceil(lasttileset.height / lasttileset.tileH));
             }
         for (let f of files) {
             if (!f.type.match("image.*")) {
@@ -60,11 +61,11 @@ export default class TilesetLoader extends React.Component {
                             width: this.naturalWidth, 
                             height: this.naturalHeight,
 
-                            tileWidth: Math.floor(this.naturalWidth / 64),
-                            tileHeight: Math.floor(this.naturalHeight / 64),
+                            tileWidth: Math.ceil(this.naturalWidth / START_SIZE),
+                            tileHeight: Math.ceil(this.naturalHeight / START_SIZE),
 
-                            tileW: 64,
-                            tileH: 64,
+                            tileW: START_SIZE,
+                            tileH: START_SIZE,
 
                             tileOffsetX: 0,
                             tileOffsetY: 0,
@@ -75,8 +76,8 @@ export default class TilesetLoader extends React.Component {
                             firstgridid: firstGridId
                         }
                     ));
-                    firstGridId += (Math.floor(this.naturalWidth / 64) * 
-                        Math.floor(this.naturalHeight / 64));             
+                    firstGridId += (Math.ceil(this.naturalWidth / START_SIZE) * 
+                        Math.ceil(this.naturalHeight / START_SIZE));             
                 }
                 
             }

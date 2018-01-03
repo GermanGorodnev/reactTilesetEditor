@@ -1,11 +1,18 @@
 import React from "react"
 import { connect } from "react-redux"
 
-import { setTool, triggerSave, triggerLoad, loadLevel } from "actions/tilesetAreaActions"
+import {
+    setTool,
+    triggerSave, 
+    triggerLoad, 
+    loadLevel,
+    updateLevelInputs,
+    clearLevel
+} from "actions/tilesetAreaActions"
 import { addModal } from "actions/modalWindowsActions"
 import { appNew } from "actions/appActions"
-import { loadTileset } from "actions/tilesetLoaderActions"
-
+import { loadTileset, clearTilesetsList } from "actions/tilesetLoaderActions"
+import { getChar } from "util.js"
 import { APP, TILESET_AREA } from "constants.js"
 
 
@@ -30,10 +37,51 @@ export default class Menu extends React.Component {
 
     componentWillMount() {
         document.addEventListener("mousedown", (ev) => this.onMouseClick(ev));
+        document.addEventListener("keydown", (ev) => this.onKeyboardUp(ev));
     }
 
     componentWillUnmount() {
         document.removeEventListener("mousedown", (ev) => this.onMouseClick(ev));
+        document.removeEventListener("keydown", (ev) => this.onKeyboardUp(ev));
+    }
+
+    onKeyboardUp(event) {
+        const w = event.which;
+        if (event.ctrlKey || event.metaKey) {
+            if (w === 66) {
+                this.onButtonNewClick(undefined);
+                event.preventDefault();
+                return false;
+            }
+            if (w === 83) {
+                // save
+                this.onButtonSaveClick(undefined);
+                event.preventDefault();
+                return false;
+            } else if (w === 79) {
+                // load
+                this.onButtonLoadClick(undefined);
+                event.preventDefault();
+                return false;
+            }
+            //////// tools /////////
+            else if (w === 49) {
+                // pen
+                this.onPenClick();
+                event.preventDefault();
+                return false;
+            } else if (w === 50) {
+                this.onEraseClick();
+                event.preventDefault();
+                return false;
+            }
+            //////// TOOLS ////////
+            else if (w === 81) {
+                this.onShiftLayerClick();
+                event.preventDefault();
+                return false;
+            }
+        }
     }
 
     onMouseClick(event) {
@@ -45,7 +93,7 @@ export default class Menu extends React.Component {
                     currentMenu: "none"
                 })
             } else {
-
+                
             }
         }
     }
@@ -66,7 +114,7 @@ export default class Menu extends React.Component {
     }
 
     onButtonNewClick(event) {
-
+        window.location.reload();
     }
 
     onButtonSaveClick(event) {
@@ -77,7 +125,6 @@ export default class Menu extends React.Component {
         if (this.loadInput) {
             this.loadInput.click();
         }
-        event.preventDefault();
     }
 
     onFileChoose(event, inputLoad) {
@@ -96,8 +143,11 @@ export default class Menu extends React.Component {
                 const obj = JSON.parse(res); 
                 inputLoad.value = "";
                 // clear the app
-                this.props.dispatch(appNew);
-                console.log(obj);
+                // clear tilesets
+                this.props.dispatch(clearTilesetsList());
+                // clear level
+                this.props.dispatch(clearLevel());
+
                 // load tilesets
                 for (let tileset of obj.tilesets) {
                     tileset.image = tileset.image.replace(/(\r\n|\n|\r)/gm,"");
@@ -113,26 +163,23 @@ export default class Menu extends React.Component {
                     }
                 }
                 // load level
-                this.props.dispatch(loadLevel(
-                    obj.level
-                ));
+                setTimeout(() => {
+                    this.props.dispatch(loadLevel(obj.level));
+                }, 1);
             }
             
             reader.readAsText(file);
         }
     }
 
-
-    onToolClick(event) {
-        let t = event.target;
-        if (t.nodeName === "IMG") {
-            t = t.parentNode;
-        }
-        const toolname = t.getAttribute("toolname");
-        this.props.dispatch(setTool(toolname));
+    onPenClick() {
+        this.props.dispatch(setTool(TILESET_AREA.TOOL.PEN));
+    }
+    onEraseClick() {
+        this.props.dispatch(setTool(TILESET_AREA.TOOL.ERASE));
     }
 
-    onShiftLayerClick(event) {
+    onShiftLayerClick() {
         this.setState({
             ...this.state,
             currentMenu: "none"
@@ -162,12 +209,12 @@ export default class Menu extends React.Component {
                                 className="menu-content-item"
                                 onClick={(ev) => this.onButtonNewClick(ev)}
                                 action={APP.MENU.FILE.NEW}
-                            >New</p>
+                            >{"New (" + APP.SHORTCUTS.NEW + ")"}</p>
                             <p 
                                 className="menu-content-item"
                                 onClick={(ev) => this.onButtonSaveClick(ev)}
                                 action={APP.MENU.FILE.SAVE}
-                            >Save</p>
+                            >{"Save (" + APP.SHORTCUTS.SAVE + ")"}</p>
                             <div>
                                 <input 
                                     type="file" 
@@ -179,7 +226,7 @@ export default class Menu extends React.Component {
                                     className="menu-content-item" 
                                     onClick={(ev) => this.onButtonLoadClick(ev)}
                                     action={APP.MENU.FILE.LOAD}
-                                >Load</p>
+                                >{"Load (" + APP.SHORTCUTS.LOAD + ")"}</p>
                             </div>
                         </div>
                     </div>
@@ -197,7 +244,7 @@ export default class Menu extends React.Component {
                                 className="menu-content-item"
                                 onClick={(ev) => this.onShiftLayerClick(ev)}
                                 action={APP.MENU.TOOLS.SHIFT_LAYER}
-                            >Shift Layer(s)</p>
+                            >{"Shift layer(s) (" + APP.SHORTCUTS.SHIFT_LAYER + ")"}</p>
                         </div>
                     </div>
                 </div>
@@ -208,17 +255,15 @@ export default class Menu extends React.Component {
                 >
                     <div 
                         className={"tool" + ((this.props.tool === TILESET_AREA.TOOL.PEN) ? " current" : "")} 
-                        toolname={TILESET_AREA.TOOL.PEN}
-                        onClick={(ev) => this.onToolClick(ev)}
+                        onClick={(ev) => this.onPenClick(ev)}
                     >
-                        <img src={require("images/icons/pen.png")} alt="Pen"/>
+                        <img src={require("images/icons/pen.png")} alt="Pen" title={"Pen (" + APP.SHORTCUTS.PEN + ")"}/>
                     </div>
                     <div 
                         className={"tool" + ((this.props.tool === TILESET_AREA.TOOL.ERASE) ? " current" : "")} 
-                        toolname={TILESET_AREA.TOOL.ERASE}
-                        onClick={(ev) => this.onToolClick(ev)}
+                        onClick={(ev) => this.onEraseClick(ev)}
                     >
-                        <img src={require("images/icons/erase.png")} alt="Eraser"/>
+                        <img src={require("images/icons/erase.png")} alt="Eraser" title={"Eraser (" + APP.SHORTCUTS.ERASE + ")"}/>
                     </div>
                 </div>
             </div>

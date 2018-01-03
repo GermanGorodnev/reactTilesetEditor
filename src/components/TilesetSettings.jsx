@@ -96,20 +96,22 @@ export default class TilesetSettings extends React.Component {
         const curry = image.tileOffsetY + mousePos.y;
         let currtilex;
         let currtiley;
+        const iw = (image.tileW + image.tileSepX);
+        const ih = (image.tileH + image.tileSepY);
         if (currx >= tileSelectArea.x) {
-            currtilex = Math.floor(currx / image.tileW) + 1;
+            currtilex = Math.floor(currx / iw) + 1;
             neww = Math.abs(currtilex - tileSelectArea.tileX) //Math.floor(Ma / image.tileW) + 1; 
         } else {
-            currtilex = Math.ceil(currx / image.tileW) - 1;
+            currtilex = Math.ceil(currx / iw) - 1;
             neww = Math.abs(currtilex - tileSelectArea.tileX) + 1;
             //Math.ceil(neww / image.tileW) + 1; 
         }
         if (curry >= tileSelectArea.y) {
-            currtiley = Math.floor(curry / image.tileH) + 1;
+            currtiley = Math.floor(curry / ih) + 1;
             newh = Math.abs(currtiley - tileSelectArea.tileY);
             //Math.floor(newh / image.tileH) + 1; 
         } else {
-            currtiley = Math.ceil(curry / image.tileH) - 1;
+            currtiley = Math.ceil(curry / ih) - 1;
             newh = Math.abs(currtiley - tileSelectArea.tileY) + 1;
             //Math.ceil(newh / image.tileH) + 1; 
         }
@@ -218,7 +220,7 @@ export default class TilesetSettings extends React.Component {
                     className="tileset-wrapper"
                     style={tilesetWrapperStyle}
                 >
-                    <div>LUL</div>
+                    <div>No tileset choosen</div>
                 </div>
             )
         }

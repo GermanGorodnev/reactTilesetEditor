@@ -304,6 +304,8 @@ html {
                 display: flex;
                 flex-flow: row nowrap;
                 justify-content: space-between;
+                border-bottom: 2px solid #000;
+                margin-bottom: 5px;
                 .button-add-layer {
                     margin-right: 8px;
                     cursor: pointer;
@@ -318,10 +320,29 @@ html {
                 margin: 2px 0;
                 &.current-layer {
                     outline: 2px solid rgb(172, 29, 29);
-                    
                 }
-                input {
+                input[type="checkbox"] {
                     margin-right: 8px;
+                }
+                input[type="text"] {
+                    margin-left: 2px;
+                    width: 75%;
+                }
+
+                .name {
+                    display: block;
+                    &.invis {
+                        display: none;
+                    }
+                }
+
+                input.name-input {
+                    display: none;
+                    font: 1.1rem @main-font;
+                    border: 2px solid rgb(54, 29, 197);
+                    &.visible {
+                        display: block;
+                    }
                 }
             }
 
@@ -336,8 +357,15 @@ html {
                         font: 1.3rem Arial;
                         font-weight: 900;
                         cursor: pointer;
+                        margin-right: 5px;
                     }
                 } 
+                .delete {
+                    color: rgb(126, 18, 18);
+                    align-self: flex-end;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
             }
         }
 
@@ -440,10 +468,8 @@ html {
                 display: flex;
                 flex-flow: row nowrap;
 
-                &:nth-of-type(1), &:nth-of-type(2) {
-                    .zone {
-                        width: 48%;
-                    }
+                .zone {
+                    width: 50%;
                 }
             }
 

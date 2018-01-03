@@ -8,7 +8,6 @@ import {
 
 const initialState = {
     width: window.innerWidth / 2,
-    maxWidth: window.innerWidth / 1.5,
     height: window.innerHeight,
 
     level: {
@@ -31,6 +30,7 @@ const initialState = {
     
     currentLayer: undefined,
     showLevelParams: true,
+    updateLevelParams: false,
 
     loadTrigger: false,
     saveTrigger: false,
@@ -92,6 +92,13 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 showLevelParams: action.payload.toggle
+            }
+        }
+
+        case TILESET_AREA.UPDATE_LEVEL_INPUTS: {
+            return {
+                ...state,
+                updateLevelParams: action.payload.toggle
             }
         }
 
@@ -208,6 +215,35 @@ export default function reducer(state = initialState, action) {
             }
         }
 
+        case TILESET_AREA.LAYER_SET_NAME: {
+            return {
+                ...state,
+                level: {
+                    ...state.level,
+                    layers: state.level.layers.map((layer, ind) => {
+                        const nl = {...layer};
+                        if (ind === action.payload.ind) {
+                            nl.name = action.payload.name;
+                        }
+                        return nl;
+                    })
+                }
+            }
+        }
+
+        case TILESET_AREA.LAYER_DELETE: {
+            return {
+                ...state,
+                level: {
+                    ...state.level,
+                    layers: state.level.layers.filter((layer, ind) => {
+                        return ind !== action.payload.ind;
+                    })
+                }
+            }
+        }
+
+
 
         case TILESET_AREA.LEVEL.RERENDER_NEED: {
             return {
@@ -247,6 +283,16 @@ export default function reducer(state = initialState, action) {
         }
 
 
+        case TILESET_AREA.LEVEL.CLEAR: {
+            return {
+                ...state,
+                level: {
+                    ...state.level,
+                    layers: []
+                },
+                currentLayer: undefined
+            }
+        }
 
 
 

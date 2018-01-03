@@ -177,6 +177,26 @@ export function shiftLayersByTile(ind, xoff, yoff) {
 }
 
 
+export function deleteLayer(ind) {
+    return {
+        type: TILESET_AREA.LAYER_DELETE,
+        payload: {
+            ind
+        }
+    }
+}
+
+export function setLayerName(ind, name) {
+    return {
+        type: TILESET_AREA.LAYER_SET_NAME,
+        payload: {
+            ind,
+            name
+        }
+    }
+}
+
+
 
 export function levelPlaceTile(params) {
     return {
@@ -250,13 +270,35 @@ export function triggerLoad(toggle) {
 
 
 export function loadLevel(level) {
-    console.log("start lo load", level);
     return function(dispatch) {
         dispatch(levelSetSize(level.width, level.height));
         dispatch(levelSetTileSize(level.tileW, level.tileH));
         for (let layer of level.layers) {
-            console.log("LAYER", layer);
             dispatch(levelLayerLoad(layer));
+        }
+        setTimeout(() => {
+            dispatch(updateLevelInputs(true));
+        }, 1);
+    }
+}
+
+
+export function updateLevelInputs(toggle) {
+    return {
+        type: TILESET_AREA.UPDATE_LEVEL_INPUTS,
+        payload: {
+            toggle
+        }
+    }
+}
+
+
+
+export function clearLevel() {
+    return {
+        type: TILESET_AREA.LEVEL.CLEAR,
+        payload: {
+            
         }
     }
 }

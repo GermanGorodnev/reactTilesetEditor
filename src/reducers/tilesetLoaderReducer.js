@@ -36,6 +36,15 @@ export default function reducer(state = initialState, action) {
                 ]
             }
         }
+
+        case TILESET_LOADER.CLEAR_TILESETS: {
+            return {
+                ...state,
+                currentTileset: undefined,
+                tilesets: []
+            }
+        }
+
         case TILESET_LOADER.SET_CURRENT: {
             return {
                 ...state,
@@ -168,8 +177,8 @@ export default function reducer(state = initialState, action) {
             for (let i = 1; i < newTilesets.length; i++) {
                 const prev = newTilesets[i - 1];
                 newTilesets[i].firstgridid = prev.firstgridid + 
-                    (Math.floor(prev.width / prev.tileW) * 
-                    Math.floor(prev.height / prev.tileH))
+                    (Math.ceil(prev.width / prev.tileW) * 
+                    Math.ceil(prev.height / prev.tileH))
             }
 
             return {

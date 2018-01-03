@@ -1,6 +1,15 @@
 import { TILESET_LOADER } from "constants.js"
 import { TILESET_AREA } from "../constants";
 
+
+export function clearTilesetsList() {
+    return {
+        type: TILESET_LOADER.CLEAR_TILESETS,
+        payload: {
+        }
+    }
+}
+
 export function loadTileset(params) {
     return {
         type: TILESET_LOADER.LOAD_TILESET,

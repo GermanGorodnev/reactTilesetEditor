@@ -11,29 +11,24 @@ import {
     levelSetTileSize,
     levelPlaceTile, 
 
-    levelLayerAdd,
-    levelLayerSetVisible,
-
     levelRerenderNeed,
     levelRerenderSuccess,
 
-    setCurrentLayer,
-    shiftLayer,
-
     showLevelParams,
+    updateLevelInputs,
 
     triggerSave,
     triggerLoad
 
-} from "../actions/tilesetAreaActions"
+} from "\actions/tilesetAreaActions"
 import {renderGrid} from "util.js"
-import { TILESET_AREA } from "../constants";
+import { TILESET_AREA } from "constants.js";
 import Menu from "components/Menu"
+import LayersList from "components/LayersList"
 
 @connect((store) => {
     return {
         width: store.tilesetArea.width,
-        maxWidth: store.tilesetArea.maxWidth,
         height: store.tilesetArea.height,
         level: store.tilesetArea.level,
         currentLayer: store.tilesetArea.currentLayer,
@@ -45,6 +40,7 @@ import Menu from "components/Menu"
         renderedLevel: store.tilesetArea.renderedLevel,
 
         showLevelParams: store.tilesetArea.showLevelParams,
+        updateLevelParams: store.tilesetArea.updateLevelParams,
 
         saveTrigger: store.tilesetArea.saveTrigger,
         loadTrigger: store.tilesetArea.loadTrigger,
@@ -87,7 +83,6 @@ export default class TilesetArea extends React.Component {
             this.setState({
                 ...this.state,
                 renderedLevel: this.renderLevel(),
-                renderedLayersList: this.renderLayersList(),
             });           
             this.props.dispatch(levelRerenderSuccess());
         }
@@ -98,7 +93,16 @@ export default class TilesetArea extends React.Component {
             FileSaver.saveAs(blob, "rteSave.json");
             setTimeout(() => {
                 this.props.dispatch(triggerSave(false));
-            }, 10);
+            }, 5);
+        }
+        if (newProps.updateLevelParams) {
+            this.iLevelW.value = newProps.level.width;
+            this.iLevelH.value = newProps.level.height;
+            this.iTileW.value = newProps.level.tileW;
+            this.iTileH.value = newProps.level.tileH;
+            setTimeout(() => {
+                this.props.dispatch(updateLevelInputs(false));
+            }, 5);
         }
     }
 
@@ -115,16 +119,6 @@ export default class TilesetArea extends React.Component {
         save.level = this.props.level;
         return save;
     }
-
-    loadFromFile() {
-        
-    }
-
-
-
-
-
-
 
 
 
@@ -150,6 +144,7 @@ export default class TilesetArea extends React.Component {
             }
         });
     }
+
     onCanvasMouseLeave(event) {
         this.setState((prev) => {
             return {
@@ -158,6 +153,7 @@ export default class TilesetArea extends React.Component {
             }
         })
     }
+    
     onCanvasMouseUp(event) {
 
     }
@@ -175,7 +171,7 @@ export default class TilesetArea extends React.Component {
                 const tileset = tilesets[currentTileset] ? tilesets[currentTileset] : undefined;
                 if (tileset === undefined)
                     return;
-                const imagetilew = Math.floor(tileset.width / tileset.tileW);
+                const imagetilew = Math.ceil(tileset.width / tileset.tileW);
                 const pentilex = penArea.tileX;
                 const pentiley = penArea.tileY;
                 const mouse = this.stageNode.getStage().getPointerPosition();
@@ -200,50 +196,9 @@ export default class TilesetArea extends React.Component {
         }
     }
 
-    onLayerListItemInputChange(event) {
-        const tg = event.target;
-        const newval = tg.checked;
-        this.props.dispatch(levelLayerSetVisible(Number(tg.parentNode.getAttribute("index")), newval));
-        event.stopPropagation();
-        //this.props.dispatch(levelRerenderNeed());
-    }
-
-    onLayerListItemClick(event) {
-        let tg = event.target;
-        if (tg.nodeName === "INPUT") {
-            return;
-        }
-        if (!tg.hasAttribute("index"))
-            tg = tg.parentNode;
-        this.props.dispatch(setCurrentLayer(Number(tg.getAttribute("index"))));
-    }
-
-    layerShiftUp() {
-        this.props.dispatch(shiftLayer(this.props.currentLayer, -1));
-        this.props.dispatch(setCurrentLayer(Math.max(0, this.props.currentLayer - 1)));
-    }
-
-    layerShiftDown() {
-        this.props.dispatch(shiftLayer(this.props.currentLayer, 1));
-        this.props.dispatch(setCurrentLayer(Math.min(this.props.currentLayer + 1, this.props.level.layers.length - 1)));
-    }
-
     toggleParams() {
         this.props.dispatch(showLevelParams(!this.props.showLevelParams));
     }
-
-
-
-
-    levelLayerAdd() {
-        // get current level width
-        const lw = this.props.level.width;
-        const lh = this.props.level.height;
-        this.props.dispatch(levelLayerAdd("Layer " + (this.props.level.layers.length + 1).toString(), lw, lh));
-    }
-
-
-
 
 
     someBadInput(event) {
@@ -398,8 +353,8 @@ export default class TilesetArea extends React.Component {
                         const xoff = (tile - tileset.firstgridid -0) % tileset.tileWidth;
                         const yoff = ~~((tile - tileset.firstgridid -0) / tileset.tileWidth);
                         const clipArea = {
-                            x: (tileset.tileW + tileset.tileSepX) * (xoff ),
-                            y: (tileset.tileH + tileset.tileSepY) * (yoff ),
+                            x: tileset.tileOffsetX + (tileset.tileW + tileset.tileSepX) * (xoff ),
+                            y: tileset.tileOffsetY + (tileset.tileH + tileset.tileSepY) * (yoff ),
                             width: tileset.tileW,
                             height: tileset.tileH
                         }
@@ -446,6 +401,9 @@ export default class TilesetArea extends React.Component {
         if (this.stageNode === undefined) {
             return;
         }
+        if (level.layers.length === 0) {
+            return;
+        }
         const mouse = this.stageNode.getStage().getPointerPosition();
 
         let penTiles = [];
@@ -456,9 +414,17 @@ export default class TilesetArea extends React.Component {
         for (let i = 0; i < penArea.tileWidth; i++) {
             for (let j = 0; j < penArea.tileHeight; j++) {
                 // now render each tile on place
+                /* 
+                const clipArea = {
+                            x: tileset.tileOffsetX + (tileset.tileW + tileset.tileSepX) * (xoff ),
+                            y: tileset.tileOffsetY + (tileset.tileH + tileset.tileSepY) * (yoff ),
+                            width: tileset.tileW,
+                            height: tileset.tileH
+                        }
+                */
                 let clipArea = {
-                    x: image.tileOffsetX + (penArea.tileX + i) * image.tileW,
-                    y: image.tileOffsetY + (penArea.tileY + j) * image.tileH,
+                    x: image.tileOffsetX + (penArea.tileX + i) * (image.tileW + image.tileSepX),
+                    y: image.tileOffsetY + (penArea.tileY + j) * (image.tileH + image.tileSepY),
                     width: image.tileW,
                     height: image.tileH
                 }
@@ -483,38 +449,6 @@ export default class TilesetArea extends React.Component {
         return (
             penTiles
         )
-    }
-
-    renderLayersList() {
-        // render the top-right representiation with all custom fields
-        let layers = [];
-        const {level, currentLayer} = this.props;
-        if (level.layers.length === 0)
-            return;
-        // TODO: DIV NOT P!
-        level.layers.forEach((layer, index) => {
-            const classes = "layer-item" +
-                ((index === currentLayer) ? " current-layer" : "") ;           
-            layers.push(
-                <div 
-                    key={index}
-                    className={classes}
-                    index={index}
-                    onClick={(ev) => this.onLayerListItemClick(ev)}
-                >
-                    <p 
-                        className="name"
-                    >{layer.name}</p>
-                    <input 
-                        type="checkbox" 
-                        defaultChecked={layer.visible}
-                        onChange={(ev) => this.onLayerListItemInputChange(ev)}
-                    />
-                </div>
-            );
-        });
-
-        return layers;
     }
 
     render() {
@@ -552,15 +486,14 @@ export default class TilesetArea extends React.Component {
             toolRender = (this.state.pen);
         }
 
-        let layersList = this.renderLayersList();
         const HIDE = ((!this.props.showLevelParams) ? " hide" : "");
         return (
             <ResizableBox 
                 className="tileset-area" 
                 width={this.props.width}
                 height={height}
-                minConstraints={[300, height]}
-                maxConstraints={[this.props.maxWidth, height]}
+                minConstraints={[window.innerWidth / 3, height]}
+                maxConstraints={[window.innerWidth / 1.5, height]}
                 onResize={this.onResize}
                 style={tilesetAreaStyle}
             >    
@@ -594,7 +527,7 @@ export default class TilesetArea extends React.Component {
 
                     <div className="zone-wrap">
                         <div className="zone">
-                            <p className="input-name">Level W</p>
+                            <p className="input-name">Lvl W</p>
                             <input 
                                 type="number" 
                                 name="levelW"
@@ -604,7 +537,7 @@ export default class TilesetArea extends React.Component {
                             />
                         </div>
                         <div className="zone">
-                            <p className="input-name">Level H</p>
+                            <p className="input-name">Lvl H</p>
                             <input 
                                 type="number" 
                                 name="levelH"
@@ -638,31 +571,8 @@ export default class TilesetArea extends React.Component {
                         </div>
                     </div>
 
+                    <LayersList />
 
-
-
-                    <div className="layers-list">
-                        <div className="layers-controller">
-                            <p className="input-name">Layers</p>
-                            <p 
-                                className="button-add-layer"
-                                onClick={() => this.levelLayerAdd()}
-                            >+</p>
-                        </div>
-                        {layersList}
-                        <div className="layers-tools">
-                            <div className="updown">
-                                <p 
-                                    className="arrow"
-                                    onClick={(ev) => this.layerShiftUp()}
-                                >&uarr;</p>
-                                <p 
-                                    className="arrow"
-                                    onClick={(ev) => this.layerShiftDown()}
-                                >&darr;</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <Menu />

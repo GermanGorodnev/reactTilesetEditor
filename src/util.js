@@ -115,3 +115,19 @@ export function median(a, b, c) {
 export function sign(x) {
     return (x < 0) ? -1 : ((x > 0) ? 1 : 0);
 }
+
+
+
+export function getChar(event) {
+    if (event.which === null) { 
+        if (event.keyCode < 32) return null; 
+        return String.fromCharCode(event.keyCode)
+    }
+
+    if (event.which !== 0 && event.charCode !== 0) { 
+        if (event.which < 32) return null; 
+        return String.fromCharCode(event.which); 
+    }
+
+    return null; // спец. символ
+}

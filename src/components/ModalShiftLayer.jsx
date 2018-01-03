@@ -21,6 +21,7 @@ export default class ModalShiftLayer extends React.Component {
             return;
         }
         this.props.dispatch(shiftLayersByTile((toAll) ? -1 : this.props.currentLayer, xoff, yoff));
+        event.stopPropagation();
         this.close();
     }
 
@@ -28,11 +29,20 @@ export default class ModalShiftLayer extends React.Component {
         this.props.dispatch(closeModal(this.props.index));
     }
 
+    onModalAreaClick(event) {
+        const tg = event.target;
+        if (tg.classList.contains("modal-window")) {
+            // close w/o action
+            console.log("close w/o action");
+            this.close();
+        }
+    }
+
     render() {
-        console.log(this.props);
         return (
             <div
                 className="modal-window shift-layer"
+                onClick={(ev) => this.onModalAreaClick(ev)}
             >
                 <div
                     className="modal-content"
@@ -59,6 +69,7 @@ export default class ModalShiftLayer extends React.Component {
                         <input 
                             type="checkbox"
                             ref={(me) => this.toAllLayers = me}
+                            defaultChecked={true}
                         />
                         Apply to all layers
                     </label>
